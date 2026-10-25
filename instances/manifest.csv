@@ -1,4 +1,1 @@
 file,n,type,depot,seed,demand_max,route_size,slack,capacity,vehicles,command
-instances/medium/m_200_1.txt,200,uniform,center,1,10,10,1.2,58,24,python generator/gen.py --n 200 --seed 1 --type uniform --depot center --demand-max 10 --route-size 10 --slack 1.2 --out instances/medium/m_200_1.txt
-instances/medium/m_200_2_tight.txt,200,uniform,center,2,10,10,1,54,21,python generator/gen.py --n 200 --seed 2 --type uniform --depot center --demand-max 10 --route-size 10 --slack 1 --out instances/medium/m_200_2_tight.txt
-instances/small/s_50_1.txt,50,uniform,center,1,10,10,1.2,55,6,python generator/gen.py --n 50 --seed 1 --type uniform --depot center --demand-max 10 --route-size 10 --slack 1.2 --out instances/small/s_50_1.txt

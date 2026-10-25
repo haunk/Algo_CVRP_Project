@@ -1,4 +1,5 @@
 docs/
+competitors/
 
 __pycache__/
 *.pyc
@@ -6,3 +7,6 @@ __pycache__/
 venv/
 .venv/
 solution.txt
+solutions/
+instances/try/
+instances/compare/

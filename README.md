@@ -50,7 +50,7 @@ truck count x slack). The same arguments and seed always produce the identical f
 ## Submitted instances
 
 `instances/manifest.csv` lists every generated instance with its seed and the exact command that
-reproduces it. `instances/small/spec_example.txt` is the example from the project specification.
+reproduces it. The example from the project specification is in `tests/data/spec_example.txt` (test only, not submitted).
 
 ## Tools
 
