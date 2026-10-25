@@ -1,0 +1,10 @@
+instance,size,version,seed,time,cost,feasible,routes,vehicles,note
+s_C_500.txt,small,final,0,25.559,77657.5000,1,51,60,
+s_T_500.txt,small,final,0,25.553,56048.8000,1,50,50,
+s_U_500.txt,small,final,0,25.565,48766.9000,1,51,62,
+m_C_800.txt,medium,final,0,51.059,135015.6000,1,81,98,
+m_T_800.txt,medium,final,0,51.061,96961.2000,1,81,81,
+m_U_800.txt,medium,final,0,51.059,74517.2000,1,81,96,
+l_C_1500.txt,large,final,0,153.072,246760.6000,1,151,180,
+l_T_1500.txt,large,final,0,153.069,159863.8000,1,152,152,
+l_U_1500.txt,large,final,0,153.071,132638.4000,1,150,179,
