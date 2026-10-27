@@ -1,0 +1,12 @@
+s_C_500.txt                         t=  29.01s cost=78997.5000   feasible=1 
+s_T_500.txt                         t=  28.96s cost=88451.8000   feasible=1 
+s_U_500.txt                         t=  28.96s cost=50558.9000   feasible=1 
+a2_small.txt                        t=  28.95s cost=1757.0500    feasible=1 
+m_C_800.txt                         t=  58.96s cost=136147.4000  feasible=1 
+m_T_800.txt                         t=  59.06s cost=153003.0000  feasible=1 
+m_U_800.txt                         t=  58.97s cost=76399.2000   feasible=1 
+a2_medium.txt                       t=  58.96s cost=9375.2900    feasible=1 
+l_C_1500.txt                        t= 446.62s cost=             feasible=0 timeout
+l_T_1500.txt                        t= 179.04s cost=162240.1000  feasible=1 
+l_U_1500.txt                        t= 347.22s cost=             feasible=0 timeout
+a2_large.txt                        t= 178.99s cost=28950.7400   feasible=1 

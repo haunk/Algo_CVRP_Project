@@ -1,0 +1,7 @@
+﻿python : cost=247569.700000; routes=150; elapsed=178.934s; initialization=32.862s; rebuilds=75; rebuild_successes=75
+At line:5 char:1
++ python competitors/Friend_A/solver.py instances/large/l_C_1500.txt -- ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (cost=247569.700...ld_successes=75:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
