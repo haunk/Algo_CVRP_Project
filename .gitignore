@@ -10,3 +10,6 @@ solution.txt
 solutions/
 instances/try/
 instances/compare/
+
+# experiment output (CSV logs), reproducible from the commands in docs/PROGRESS.md
+results/

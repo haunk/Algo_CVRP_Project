@@ -1,7 +1,0 @@
-instance,size,version,seed,time,cost,feasible,routes,vehicles,note
-a2_small.txt,small,algo1,0,25.549,1666.8300,1,15,15,
-a2_medium.txt,medium,algo1,0,51.051,7394.2900,1,79,79,
-a2_large.txt,large,algo1,0,153.079,13673.4500,1,157,157,
-a2_small.txt,small,algo2,0,28.950,1757.0500,1,15,15,
-a2_medium.txt,medium,algo2,0,58.956,9375.2900,1,79,79,
-a2_large.txt,large,algo2,0,178.990,28950.7400,1,157,157,

@@ -173,10 +173,10 @@ No output from the second command means the files are identical.
 solver/solver.py      the solver (entry point)
 cvrp/                 solver modules: reading files, construction, local search, ALNS, validation
 generator/gen.py      instance generator
-tools/                validate, batch_run, score, size_sweep, convert_cvrplib
+tools/                validate, batch_run, score, size_sweep, convert_cvrplib, run_compare, run_ab, ab_summary
 instances/            small/ medium/ large/ (submitted), manifest.csv, benchmark/ (CVRPLIB X instances)
 tests/data/           specification example and its known correct solution
-results/              CSV logs of experiments
+results/              CSV logs of experiments (not in git, recreate them with the commands below)
 report/figures/       figures for the report
 ```
 

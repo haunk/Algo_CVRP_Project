@@ -1,5 +1,0 @@
-instance,size,version,seed,time,cost,feasible,routes,vehicles,note
-s_50_1.txt,small,final,0,25.561,8091.9000,1,6,6,
-spec_example.txt,small,final,0,25.560,21.8000,1,2,2,
-m_200_1.txt,medium,final,0,51.049,22492.8000,1,21,24,
-m_200_2_tight.txt,medium,final,0,51.048,22561.4000,1,21,21,
