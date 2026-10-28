@@ -40,7 +40,8 @@ def instance_path(scenario, n):
 def generate(scenario, n):
     path = instance_path(scenario, n)
     if not os.path.exists(path):
-        cmd = [sys.executable, os.path.join(ROOT, "generator", "gen.py"), "--n", str(n),
+        # The size word is not used here: solve() always passes --time-limit
+        cmd = [sys.executable, os.path.join(ROOT, "generator", "gen.py"), "--size", "small", "--n", str(n),
                "--seed", str(n + SEED_OFFSET[scenario]), "--out", path, "--no-manifest"] + SCENARIOS[scenario]
         subprocess.run(cmd, check=True, capture_output=True)
     return path

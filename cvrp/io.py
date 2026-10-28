@@ -18,6 +18,10 @@ def _read_text(path):
     return data.decode("utf-8-sig")
 
 
+SIZE_CLASSES = ("small", "medium", "large")
+TIME_LIMITS = {"small": 30.0, "medium": 60.0, "large": 180.0}
+
+
 def _number(token):
     """Parse a number, keeping integers as int (e.g. demands, capacity)."""
     value = float(token)
@@ -27,10 +31,17 @@ def _number(token):
 
 
 def read_instance(path):
+    """Read an instance file. Returns (demands, dist, capacity, vehicles), see read_instance_with_size."""
+    return read_instance_with_size(path)[:4]
+
+
+def read_instance_with_size(path):
     """Read an instance file.
 
-    Returns (demands, dist, capacity, vehicles).
+    Returns (demands, dist, capacity, vehicles, size_class).
     demands[0] is the depot. dist is a list of (n+1) lists of floats.
+    size_class is "small", "medium" or "large" from the first line (any capitalisation, as the
+    instructor announced), or None if the file has no such line.
     Tolerates tabs, CRLF, UTF-8 or UTF-16 files, blank lines, and the Capacity/Vehicles
     lines appearing anywhere in the file.
     """
@@ -38,10 +49,14 @@ def read_instance(path):
 
     capacity = None
     vehicles = None
+    size_class = None
     rows = []
     for line in text.splitlines():
         tokens = line.split()
         if not tokens:
+            continue
+        if not rows and len(tokens) == 1 and tokens[0].lower().strip(":") in SIZE_CLASSES:
+            size_class = tokens[0].lower().strip(":")
             continue
         key = tokens[0].lower()
         if key.startswith("capacity") or key.startswith("vehicles"):
@@ -69,7 +84,7 @@ def read_instance(path):
     dist = []
     for i in range(1, size + 1):
         dist.append([float(t) for t in rows[i]])
-    return demands, dist, capacity, vehicles
+    return demands, dist, capacity, vehicles, size_class
 
 
 def check_instance(demands, dist, capacity, vehicles):

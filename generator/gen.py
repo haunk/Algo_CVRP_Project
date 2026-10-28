@@ -1,7 +1,7 @@
 """CVRP instance generator.
 
-Usage: python generator/gen.py --n 50 --seed 1 --out instances/small/s_50_1.txt
-       python generator/gen.py --n 800 --seed 7 --type clustered --depot corner --slack 1.0
+Usage: python generator/gen.py --size small --n 50 --seed 1 --out instances/small/s_50_1.txt
+       python generator/gen.py --size medium --n 800 --seed 7 --type clustered --depot corner --slack 1.0
                                --out instances/large/l_cl_800_7.txt
 
 Points lie in a 1000 x 1000 square. Layout types:
@@ -25,7 +25,7 @@ import random
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MANIFEST = os.path.join(ROOT, "instances", "manifest.csv")
-MANIFEST_FIELDS = ["file", "n", "type", "depot", "seed", "demand_max", "route_size", "slack",
+MANIFEST_FIELDS = ["file", "size", "n", "type", "depot", "seed", "demand_max", "route_size", "slack",
                    "capacity", "vehicles", "command"]
 
 
@@ -102,11 +102,12 @@ def generate(n, seed, demand_max, route_size, slack, layout="uniform", depot="ce
     return demands, dist, capacity, vehicles
 
 
-def write_instance(path, demands, dist, capacity, vehicles):
+def write_instance(path, demands, dist, capacity, vehicles, size):
     folder = os.path.dirname(path)
     if folder:
         os.makedirs(folder, exist_ok=True)
-    lines = [" ".join(str(q) for q in demands)]
+    # The size class is the only word on the first line (instructor's rule for all teams)
+    lines = [size, " ".join(str(q) for q in demands)]
     for row in dist:
         lines.append(" ".join("%.1f" % d for d in row))
     lines.append("Capacity: %d" % capacity)
@@ -119,11 +120,11 @@ def write_instance(path, demands, dist, capacity, vehicles):
 def record(args, capacity, vehicles):
     """Add (or replace) this file's row in instances/manifest.csv."""
     rel = os.path.relpath(os.path.abspath(args.out), ROOT).replace(os.sep, "/")
-    command = "python generator/gen.py --n %d --seed %d --type %s --depot %s --demand-max %d " \
+    command = "python generator/gen.py --size %s --n %d --seed %d --type %s --depot %s --demand-max %d " \
               "--route-size %g --slack %g%s --out %s" % (
-                  args.n, args.seed, args.type, args.depot, args.demand_max, args.route_size,
+                  args.size, args.n, args.seed, args.type, args.depot, args.demand_max, args.route_size,
                   args.slack, " --clusters %d" % args.clusters if args.clusters else "", rel)
-    row = {"file": rel, "n": args.n, "type": args.type, "depot": args.depot, "seed": args.seed,
+    row = {"file": rel, "size": args.size, "n": args.n, "type": args.type, "depot": args.depot, "seed": args.seed,
            "demand_max": args.demand_max, "route_size": "%g" % args.route_size,
            "slack": "%g" % args.slack, "capacity": capacity, "vehicles": vehicles, "command": command}
     rows = []
@@ -140,6 +141,8 @@ def record(args, capacity, vehicles):
 
 def main():
     parser = argparse.ArgumentParser(description="Generate a random CVRP instance.")
+    parser.add_argument("--size", choices=["small", "medium", "large"], required=True,
+                        help="size class, written as the first line of the file")
     parser.add_argument("--n", type=int, required=True, help="number of customers")
     parser.add_argument("--seed", type=int, required=True, help="random seed")
     parser.add_argument("--out", required=True, help="output file path")
@@ -157,7 +160,7 @@ def main():
 
     demands, dist, capacity, vehicles = generate(args.n, args.seed, args.demand_max, args.route_size,
                                                  args.slack, args.type, args.depot, args.clusters)
-    write_instance(args.out, demands, dist, capacity, vehicles)
+    write_instance(args.out, demands, dist, capacity, vehicles, args.size)
     if not args.no_manifest:
         record(args, capacity, vehicles)
     print("wrote %s  n=%d  capacity=%d  vehicles=%d" % (args.out, args.n, capacity, vehicles))

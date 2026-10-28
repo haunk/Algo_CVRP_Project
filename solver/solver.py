@@ -1,6 +1,9 @@
 """CVRP solver: Clarke-Wright start, local search, then ALNS until the time budget is used.
 
 Usage: python solver/solver.py <instance_file> [--time-limit S] [--seed N] [--stop-fraction F]
+
+The time limit L is --time-limit if given, else it follows the size word on the first line of the
+instance (small 30 s, medium 60 s, large 180 s), else 30 s.
 Prints the solution to stdout. Progress messages go to stderr.
 
 Time is measured from program start (including imports and file reading). The search stops at
@@ -17,7 +20,7 @@ import sys  # noqa: E402
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from cvrp.io import read_instance, format_solution  # noqa: E402
+from cvrp.io import read_instance_with_size, format_solution, TIME_LIMITS  # noqa: E402
 from cvrp.validator import validate  # noqa: E402
 from cvrp.construct import (nearest_neighbors, nearest_neighbor, clarke_wright,  # noqa: E402
                             repair_vehicles, bin_packing_routes)
@@ -26,8 +29,9 @@ from cvrp.alns import alns  # noqa: E402
 from cvrp.fleet import reduce_routes  # noqa: E402
 
 # The size class (and so the time limit) of an instance is set by the group that made it, so the
-# solver cannot tell it from n. Without --time-limit we assume the smallest limit (30 s): finishing
-# early only costs a little solution quality, while running late on a 30 s instance is very costly.
+# solver cannot tell it from n. Every file names its class on the first line. If neither that word
+# nor --time-limit is there, we assume the smallest limit (30 s): finishing early only costs a
+# little solution quality, while running late on a 30 s instance is very costly.
 DEFAULT_TIME_LIMIT = 30.0
 DEFAULT_STOP_FRACTION = 0.85
 NEIGHBORS = 30             # size of the granular neighbour lists
@@ -107,17 +111,25 @@ def solve(demands, dist, capacity, vehicles, deadline, seed, keep):
 def main():
     parser = argparse.ArgumentParser(description="CVRP solver (ALNS).")
     parser.add_argument("instance")
-    parser.add_argument("--time-limit", type=float, default=DEFAULT_TIME_LIMIT,
-                        help="time limit L of the instance in seconds (default %g)" % DEFAULT_TIME_LIMIT)
+    parser.add_argument("--time-limit", type=float, default=None,
+                        help="time limit L in seconds (default: from the size word on the first "
+                             "line of the instance, else %g)" % DEFAULT_TIME_LIMIT)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--stop-fraction", type=float, default=DEFAULT_STOP_FRACTION,
                         help="stop searching at this fraction of the time limit (default %g)"
                              % DEFAULT_STOP_FRACTION)
     args = parser.parse_args()
-    deadline = START + args.stop_fraction * args.time_limit
 
-    demands, dist, capacity, vehicles = read_instance(args.instance)
-    log("read n=%d capacity=%s vehicles=%d" % (len(demands) - 1, capacity, vehicles))
+    demands, dist, capacity, vehicles, size_class = read_instance_with_size(args.instance)
+    if args.time_limit is not None:
+        time_limit, source = args.time_limit, "--time-limit"
+    elif size_class is not None:
+        time_limit, source = TIME_LIMITS[size_class], "size word '%s'" % size_class
+    else:
+        time_limit, source = DEFAULT_TIME_LIMIT, "default"
+    deadline = START + args.stop_fraction * time_limit
+    log("read n=%d capacity=%s vehicles=%d, time limit %gs (%s)" % (
+        len(demands) - 1, capacity, vehicles, time_limit, source))
 
     # Keep the best validated solution. Whatever goes wrong later, this is what gets printed.
     state = {"routes": None, "cost": None}

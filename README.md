@@ -34,15 +34,17 @@ it once.
 General form:
 
 ```
-python solver/solver.py <instance_file> --time-limit <L> > <solution_file>
+python solver/solver.py <instance_file> > <solution_file>
 ```
 
+The time limit L comes from the first line of the instance file, which holds only the size class
+`small`, `medium` or `large` (any capitalisation, as the instructor requires from all teams).
 One example per size class, using our submitted instances:
 
 ```
-python solver/solver.py instances/small/s_U_500.txt   --time-limit 30  > solutions/s_U_500.txt
-python solver/solver.py instances/medium/m_U_800.txt  --time-limit 60  > solutions/m_U_800.txt
-python solver/solver.py instances/large/l_U_1500.txt  --time-limit 180 > solutions/l_U_1500.txt
+python solver/solver.py instances/small/s_U_500.txt   > solutions/s_U_500.txt
+python solver/solver.py instances/medium/m_U_800.txt  > solutions/m_U_800.txt
+python solver/solver.py instances/large/l_U_1500.txt  > solutions/l_U_1500.txt
 ```
 
 | Instance size | L (seconds) | Our solver stops at about |
@@ -53,8 +55,8 @@ python solver/solver.py instances/large/l_U_1500.txt  --time-limit 180 > solutio
 
 - The solver keeps improving its answer until 85% of L, then prints the best feasible solution.
   The clock starts when the program starts, so file reading is included.
-- If `--time-limit` is not given, it assumes 30 seconds (the safe choice, since the size class
-  cannot be read from the file).
+- `--time-limit L` overrides the size word. If the file has no size word and no `--time-limit` is
+  given, the solver assumes 30 seconds (the safe choice).
 - Optional: `--seed N` (default 0). The same seed and time limit give the same search path.
 - Only the solution goes to stdout. Progress messages go to stderr, so you see them on screen while
   the solution goes to the file.
@@ -89,12 +91,13 @@ route, too many routes, wrong printed cost).
 ## Run and score a whole folder
 
 The batch runner solves every `.txt` file in a folder, validates each answer and appends one row per
-instance to a CSV. The size class (small, medium, large) is taken from the folder name.
+instance to a CSV. The size class and time limit of each file come from its size word. Files without
+it (for example the CVRPLIB benchmarks) need `--time-limit` and `--size`.
 
 ```
-python tools/batch_run.py instances/small  --time-limit 30  --out results/run.csv
-python tools/batch_run.py instances/medium --time-limit 60  --out results/run.csv
-python tools/batch_run.py instances/large  --time-limit 180 --out results/run.csv
+python tools/batch_run.py instances/small  --out results/run.csv
+python tools/batch_run.py instances/medium --out results/run.csv
+python tools/batch_run.py instances/large  --out results/run.csv
 python tools/score.py results/run.csv
 ```
 
@@ -108,21 +111,24 @@ It must accept `<instance> --time-limit S --seed N` and print only the solution 
 solvers into the same CSV, each with its own `--version` name, then score:
 
 ```
-python tools/batch_run.py instances/medium --time-limit 60 --version ours     --solver "python solver/solver.py"              --out results/compare.csv
-python tools/batch_run.py instances/medium --time-limit 60 --version friend_a --solver "python competitors/friend_a/solver.py" --out results/compare.csv
+python tools/batch_run.py instances/medium --version ours     --solver "python solver/solver.py"              --out results/compare.csv
+python tools/batch_run.py instances/medium --version friend_a --solver "python competitors/friend_a/solver.py" --out results/compare.csv
 python tools/score.py results/compare.csv
 ```
 
-For a folder that is not named small, medium or large, add `--size small|medium|large` so the scorer
-uses the right time limit.
+The batch runner always passes `--time-limit` to the solver it calls. For files without a size word,
+add `--time-limit L --size small|medium|large` so the scorer uses the right limit.
 
 ## Generate instances
 
 General form:
 
 ```
-python generator/gen.py --n <customers> --seed <seed> --out <file> [options]
+python generator/gen.py --size small|medium|large --n <customers> --seed <seed> --out <file> [options]
 ```
+
+`--size` is written as the first line of the file. Distances are Euclidean in a 1000 x 1000 square,
+rounded to 1 decimal, so every number has at most 5 significant digits (the limit is 6).
 
 Options: `--type uniform|clustered|mixed`, `--depot center|corner|random`, `--clusters K`,
 `--demand-max`, `--route-size` (average customers per truck), `--slack` (vehicles = First-Fit-Decreasing
@@ -133,7 +139,7 @@ Every generated file is recorded in `instances/manifest.csv`. For test files, wr
 (ignored by git) and add `--no-manifest`:
 
 ```
-python generator/gen.py --n 300 --seed 7 --type clustered --depot corner --out instances/try/t_C_300.txt --no-manifest
+python generator/gen.py --size small --n 300 --seed 7 --type clustered --depot corner --out instances/try/t_C_300.txt --no-manifest
 ```
 
 ## Submitted instances
@@ -143,15 +149,15 @@ depot in a corner) and T (tight fleet: mixed layout, random depot, fewest trucks
 
 | Class | Limit | File | Seed | Command |
 |-------|-------|------|------|---------|
-| Small | 30 s | `instances/small/s_U_500.txt` | 501 | `python generator/gen.py --n 500 --seed 501 --type uniform --depot center --out instances/small/s_U_500.txt` |
-| Small | 30 s | `instances/small/s_C_500.txt` | 502 | `python generator/gen.py --n 500 --seed 502 --type clustered --depot corner --out instances/small/s_C_500.txt` |
-| Small | 30 s | `instances/small/s_T_500.txt` | 503 | `python generator/gen.py --n 500 --seed 503 --type mixed --depot random --slack 1.0 --out instances/small/s_T_500.txt` |
-| Medium | 60 s | `instances/medium/m_U_800.txt` | 801 | `python generator/gen.py --n 800 --seed 801 --type uniform --depot center --out instances/medium/m_U_800.txt` |
-| Medium | 60 s | `instances/medium/m_C_800.txt` | 802 | `python generator/gen.py --n 800 --seed 802 --type clustered --depot corner --out instances/medium/m_C_800.txt` |
-| Medium | 60 s | `instances/medium/m_T_800.txt` | 803 | `python generator/gen.py --n 800 --seed 803 --type mixed --depot random --slack 1.0 --out instances/medium/m_T_800.txt` |
-| Large | 180 s | `instances/large/l_U_1500.txt` | 1501 | `python generator/gen.py --n 1500 --seed 1501 --type uniform --depot center --out instances/large/l_U_1500.txt` |
-| Large | 180 s | `instances/large/l_C_1500.txt` | 1502 | `python generator/gen.py --n 1500 --seed 1502 --type clustered --depot corner --out instances/large/l_C_1500.txt` |
-| Large | 180 s | `instances/large/l_T_1500.txt` | 1503 | `python generator/gen.py --n 1500 --seed 1503 --type mixed --depot random --slack 1.0 --out instances/large/l_T_1500.txt` |
+| Small | 30 s | `instances/small/s_U_500.txt` | 501 | `python generator/gen.py --size small --n 500 --seed 501 --type uniform --depot center --out instances/small/s_U_500.txt` |
+| Small | 30 s | `instances/small/s_C_500.txt` | 502 | `python generator/gen.py --size small --n 500 --seed 502 --type clustered --depot corner --out instances/small/s_C_500.txt` |
+| Small | 30 s | `instances/small/s_T_500.txt` | 503 | `python generator/gen.py --size small --n 500 --seed 503 --type mixed --depot random --slack 1.0 --out instances/small/s_T_500.txt` |
+| Medium | 60 s | `instances/medium/m_U_800.txt` | 801 | `python generator/gen.py --size medium --n 800 --seed 801 --type uniform --depot center --out instances/medium/m_U_800.txt` |
+| Medium | 60 s | `instances/medium/m_C_800.txt` | 802 | `python generator/gen.py --size medium --n 800 --seed 802 --type clustered --depot corner --out instances/medium/m_C_800.txt` |
+| Medium | 60 s | `instances/medium/m_T_800.txt` | 803 | `python generator/gen.py --size medium --n 800 --seed 803 --type mixed --depot random --slack 1.0 --out instances/medium/m_T_800.txt` |
+| Large | 180 s | `instances/large/l_U_1500.txt` | 1501 | `python generator/gen.py --size large --n 1500 --seed 1501 --type uniform --depot center --out instances/large/l_U_1500.txt` |
+| Large | 180 s | `instances/large/l_C_1500.txt` | 1502 | `python generator/gen.py --size large --n 1500 --seed 1502 --type clustered --depot corner --out instances/large/l_C_1500.txt` |
+| Large | 180 s | `instances/large/l_T_1500.txt` | 1503 | `python generator/gen.py --size large --n 1500 --seed 1503 --type mixed --depot random --slack 1.0 --out instances/large/l_T_1500.txt` |
 
 `instances/manifest.csv` holds the same commands plus capacity and vehicle counts. The sizes come from
 `tools/size_sweep.py` (results in `results/sweep.csv`): at these sizes, 3 times more time improves our
@@ -161,7 +167,7 @@ cost by less than 1%. The example from the project specification is in `tests/da
 To check that a submitted file reproduces exactly, regenerate it into `instances/try/` and compare:
 
 ```
-python generator/gen.py --n 500 --seed 501 --type uniform --depot center --out instances/try/check.txt --no-manifest
+python generator/gen.py --size small --n 500 --seed 501 --type uniform --depot center --out instances/try/check.txt --no-manifest
 git diff --no-index --stat instances/small/s_U_500.txt instances/try/check.txt
 ```
 
