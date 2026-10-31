@@ -42,9 +42,9 @@ The time limit L comes from the first line of the instance file, which holds onl
 One example per size class, using our submitted instances:
 
 ```
-python solver/solver.py instances/small/s_U_500.txt   > solutions/s_U_500.txt
-python solver/solver.py instances/medium/m_U_800.txt  > solutions/m_U_800.txt
-python solver/solver.py instances/large/l_U_1500.txt  > solutions/l_U_1500.txt
+python solver/solver.py instances/small/s_T_500.txt   > solutions/s_T_500.txt
+python solver/solver.py instances/medium/m_T_800.txt  > solutions/m_T_800.txt
+python solver/solver.py instances/large/l_T_1500.txt  > solutions/l_T_1500.txt
 ```
 
 | Instance size | L (seconds) | Our solver stops at about |
@@ -71,7 +71,7 @@ Output format: total cost on the first line, then one route per line, each start
 
 Windows PowerShell 5.1 note: `>` writes the file as UTF-16. Our validator reads it, but other tools may
 not. To get a plain text file, run the commands in Git Bash or cmd, or use
-`| Out-File -Encoding ascii solutions/s_U_500.txt` instead of `> solutions/s_U_500.txt`.
+`| Out-File -Encoding ascii solutions/s_T_500.txt` instead of `> solutions/s_T_500.txt`.
 
 ## Check a solution
 
@@ -82,7 +82,7 @@ python tools/validate.py <instance_file> <solution_file>
 Example:
 
 ```
-python tools/validate.py instances/small/s_U_500.txt solutions/s_U_500.txt
+python tools/validate.py instances/small/s_T_500.txt solutions/s_T_500.txt
 ```
 
 It prints `PASS` with the recomputed cost, or `FAIL` with the reasons (missing customer, overloaded
@@ -101,7 +101,7 @@ python tools/batch_run.py instances/large  --out results/run.csv
 python tools/score.py results/run.csv
 ```
 
-The three folders take about 1.5, 2.5 and 8 minutes. `score.py` applies the official formula. With only
+Each folder holds one instance, so they take about 0.5, 1 and 3 minutes. `score.py` applies the official formula. With only
 one solver in the CSV, every score is 1.0, because our cost is also the best cost.
 
 ## Compare with another solver
@@ -144,22 +144,20 @@ python generator/gen.py --size small --n 300 --seed 7 --type clustered --depot c
 
 ## Submitted instances
 
-Three scenarios per size class: U (uniform customers, depot in the center), C (clustered customers,
-depot in a corner) and T (tight fleet: mixed layout, random depot, fewest trucks possible).
+One instance per size class, all of the T scenario (tight fleet): half uniform and half clustered
+customers, a random depot, and the fewest trucks possible (`--slack 1`, so the trucks are 99.4% to
+99.8% full). A solver that cannot pack the customers into this fleet prints an infeasible answer.
 
 | Class | Limit | File | Seed | Command |
 |-------|-------|------|------|---------|
-| Small | 30 s | `instances/small/s_U_500.txt` | 501 | `python generator/gen.py --size small --n 500 --seed 501 --type uniform --depot center --out instances/small/s_U_500.txt` |
-| Small | 30 s | `instances/small/s_C_500.txt` | 502 | `python generator/gen.py --size small --n 500 --seed 502 --type clustered --depot corner --out instances/small/s_C_500.txt` |
 | Small | 30 s | `instances/small/s_T_500.txt` | 503 | `python generator/gen.py --size small --n 500 --seed 503 --type mixed --depot random --slack 1.0 --out instances/small/s_T_500.txt` |
-| Medium | 60 s | `instances/medium/m_U_800.txt` | 801 | `python generator/gen.py --size medium --n 800 --seed 801 --type uniform --depot center --out instances/medium/m_U_800.txt` |
-| Medium | 60 s | `instances/medium/m_C_800.txt` | 802 | `python generator/gen.py --size medium --n 800 --seed 802 --type clustered --depot corner --out instances/medium/m_C_800.txt` |
 | Medium | 60 s | `instances/medium/m_T_800.txt` | 803 | `python generator/gen.py --size medium --n 800 --seed 803 --type mixed --depot random --slack 1.0 --out instances/medium/m_T_800.txt` |
-| Large | 180 s | `instances/large/l_U_1500.txt` | 1501 | `python generator/gen.py --size large --n 1500 --seed 1501 --type uniform --depot center --out instances/large/l_U_1500.txt` |
-| Large | 180 s | `instances/large/l_C_1500.txt` | 1502 | `python generator/gen.py --size large --n 1500 --seed 1502 --type clustered --depot corner --out instances/large/l_C_1500.txt` |
 | Large | 180 s | `instances/large/l_T_1500.txt` | 1503 | `python generator/gen.py --size large --n 1500 --seed 1503 --type mixed --depot random --slack 1.0 --out instances/large/l_T_1500.txt` |
 
-`instances/manifest.csv` holds the same commands plus capacity and vehicle counts. The sizes come from
+`instances/manifest.csv` holds the same commands plus capacity and vehicle counts. We also made a
+U (uniform, depot in the center) and a C (clustered, depot in a corner) file per size. They are in
+`instances/extra/` for testing, with their commands in `instances/extra/manifest.csv`, and are not
+submitted. The sizes come from
 `tools/size_sweep.py` (results in `results/sweep.csv`): at these sizes, 3 times more time improves our
 cost by less than 1%. The example from the project specification is in `tests/data/spec_example.txt`
 (test only, not submitted).
@@ -167,8 +165,8 @@ cost by less than 1%. The example from the project specification is in `tests/da
 To check that a submitted file reproduces exactly, regenerate it into `instances/try/` and compare:
 
 ```
-python generator/gen.py --size small --n 500 --seed 501 --type uniform --depot center --out instances/try/check.txt --no-manifest
-git diff --no-index --stat instances/small/s_U_500.txt instances/try/check.txt
+python generator/gen.py --size small --n 500 --seed 503 --type mixed --depot random --slack 1.0 --out instances/try/check.txt --no-manifest
+git diff --no-index --stat instances/small/s_T_500.txt instances/try/check.txt
 ```
 
 No output from the second command means the files are identical.
@@ -180,7 +178,8 @@ solver/solver.py      the solver (entry point)
 cvrp/                 solver modules: reading files, construction, local search, ALNS, validation
 generator/gen.py      instance generator
 tools/                validate, batch_run, score, size_sweep, convert_cvrplib, run_compare, run_ab, ab_summary
-instances/            small/ medium/ large/ (submitted), manifest.csv, benchmark/ (CVRPLIB X instances)
+instances/            small/ medium/ large/ (submitted, one file each), manifest.csv,
+                      extra/ (U and C files, not submitted), benchmark/ (CVRPLIB X instances)
 tests/data/           specification example and its known correct solution
 results/              CSV logs of experiments (not in git, recreate them with the commands below)
 report/figures/       figures for the report
@@ -207,4 +206,4 @@ our cost is from it.
    insertion, simulated annealing acceptance) until the time budget is used.
 4. Every solution is validated before it is kept. Only a feasible solution is printed.
 
-A diagram of this flow is in `report/figures/algorithm_flow.png`.
+![CVRP solver flow: instance file, construction, local search, ALNS loop, best solution](report/figures/algorithm_flow.png)

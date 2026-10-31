@@ -1,3 +1,6 @@
 # Keep instance files byte-identical to the generator output on every OS (no CRLF conversion)
 instances/** text eol=lf
 tests/data/** text eol=lf
+
+# Not submitted: U and C scenario files kept for testing only, left out of `git archive`
+instances/extra/ export-ignore
